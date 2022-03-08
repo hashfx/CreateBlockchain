@@ -7,18 +7,29 @@ class Block {
         this.data = data;  // details of transaction
         this.prevHash = prevHash;  // hash of previous block
         this.hash = this.calculateHash();  // hash of current block
+        this.nonce = 0;  // nonce of block
     }
 
     calculateHash() {
         // generates hash of block
-        return SHA256(this.index + this.prevHash + this.timestamp + JSON.stringify(this.data)).toString();
+        return SHA256(this.index + this.prevHash + this.timestamp + JSON.stringify(this.data) + this.nonce).toString();
+    }
+
+    mineBlock(difficulty){  // difficulty is the number of zeros in the beginning of the hash
+        // creates a block with nonce difficulty
+        // generate a hash with certain amount of zeros
+        while(this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")){
+            this.nonce++;  // increment nonce
+            this.hash = this.calculateHash();  // recalculate hash
+        }
+        console.log(this.nonce + "Block mined: " + this.hash);  // display hash
     }
 }
 
 class Blockchain {
     constructor() {  // initializes blockchain
         this.chain = [this.createGenesisBlock()];  // creates genesis block
-        
+        this.difficulty = 2;  // difficulty of mining, may need later for functions
     }
 
     createGenesisBlock() {  // first block of blockchain
@@ -31,7 +42,8 @@ class Blockchain {
 
     addBlock(newBlock) {  // adds a new block to the blockchain
         newBlock.prevHash = this.getLatestBlock().hash;  // sets previous hash of new block to hash of latest block
-        newBlock.hash = newBlock.calculateHash();  // sets hash of new block
+        // newBlock.hash = newBlock.calculateHash();  // sets hash of new block
+        newBlock.mineBlock(this.difficulty);  // mines new block with nonce protocol
         this.chain.push(newBlock);  // pushes new block to blockchain
     }
 
@@ -68,5 +80,7 @@ myCoin.chain[1].data = { amount: 50 };  // changed amount of block 1
 console.log('Blockchain Valid: ', myCoin.isChainValid());  // false
 
 */
-// console.log(JSON.stringify(myCoin, null, 4));
+console.log(JSON.stringify(myCoin, null, 4));
+
+
 
